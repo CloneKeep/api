@@ -1,0 +1,5 @@
+# 이 폴더들은 빌드할 때 제외합니다.
+venv/
+__pycache__/
+.git/
+.github/
