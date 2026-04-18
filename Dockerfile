@@ -12,4 +12,5 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 # 5. FastAPI 실행(GCP Cloud Run, 기본포트 : 8080)
+# GCP 설정 시 필요한 설정 외 다른 포트 Close)
 CMD ["uvicorn", "main.app", "--host", "0.0.0.0" "--port", "8080"]
