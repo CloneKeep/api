@@ -5,7 +5,7 @@ on:
 
 jobs:
     build-and-push:
-        runs-on: ubuntu-lastes  # GitHub 서버에 linux 실행
+        runs-on: ubuntu-lastest  # GitHub 서버에 linux 실행
         permissions:
            contents: read       # 코드 읽기 권한
            packages: write      # GHCR에 이미지 업로드 권한
