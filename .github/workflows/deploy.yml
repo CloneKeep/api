@@ -22,6 +22,6 @@ jobs:
                 # 1. 저장소 이름을 소문자로 변환해야 에러 방지
                 REPO_NAME=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
                 # 2. Dockerfile로 Image 생성 (태그명은 소문자)
-                docker build -t ghcr.io/${{ github.repository }}:latest .
+                docker build -t ghcr.io/${REPO_NAME:latest .
                 # 3. 빌드된 이미지 GHCR 푸쉬
-                docker push ghcr.io/${{ github.repository }}:latest         
+                docker push ghcr.io/$REPO_NAME:latest         
