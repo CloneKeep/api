@@ -34,7 +34,7 @@ def root():
 # 서버 실행
 uvicorn main:app --reload
 ```
-# 결과 확인
+### 결과 확인
   1. 브라우저를 열고 주소창에 http://127.0.0.1:8000 을 입력해 보세요.
     {"message": "FastAPI 설치가 완료되었습니다!"}가 보이면 성공!
   2. 대화형 API 문서: http://127.0.0.1:8000/docs 에 접속해 보세요.(swagger 페이지)
