@@ -56,8 +56,12 @@ jobs:
       - name: Build and Push
         uses: docker/build-push-action@v5
         with:
+          context: .
           push: true
           tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+          # 빌드 시점에 환경변수를 넘기려면 아래 build-args가 필요
+          build-args: |
+            DATABASE_URL=${{ secrets.DATABASE_URL }}
 
   deploy:
     needs: build-and-push
@@ -77,9 +81,9 @@ jobs:
             sudo docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
             sudo docker stop scheduler-con || true
             sudo docker rm scheduler-con || true
-            sudo docker run -d -p 8080:8080 --name scheduler-con ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
-      - name: Build and Push Docker Image
-        run: |
-          docker build --build-arg DATABASE_URL=${{ secrets.DATABASE_URL }} -f Dockerfile -t gcr.io/my-project/my-api .
-
-
+            
+            # 실행 시에도 환경 변수를 넣어주어야 앱이 DB 주소를 인식
+            sudo docker run -d -p 8080:8080 \
+              --name scheduler-con \
+              -e DATABASE_URL='${{ secrets.DATABASE_URL }}' \
+              ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
