@@ -80,6 +80,6 @@ jobs:
             sudo docker run -d -p 8080:8080 --name scheduler-con ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
       - name: Build and Push Docker Image
         run: |
-          docker build --build-arg DATABASE_URL=${{ secrets.DATABASE_URL }} -t gcr.io/my-project/my-api .
+          docker build --build-arg DATABASE_URL=${{ secrets.DATABASE_URL }} -f Dockerfile -t gcr.io/my-project/my-api .
 
 
