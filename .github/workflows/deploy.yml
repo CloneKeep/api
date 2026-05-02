@@ -87,3 +87,4 @@ jobs:
               --name scheduler-con \
               -e DATABASE_URL='${{ secrets.DATABASE_URL }}' \
               ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+
