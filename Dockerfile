@@ -1,6 +1,9 @@
 # 1. 파이썬 이미지 선택
 FROM python:3.12-slim
 
+# vi 설치
+RUN apt-get update && apt-get install -y vim && rm -rf /var/lib/apt/lists/*
+
 # 2. 작업 디렉토리 설정
 WORKDIR /app
 
