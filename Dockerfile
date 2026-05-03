@@ -13,4 +13,5 @@ COPY . .
 
 # 5. FastAPI 실행(GCP Cloud Run, 기본포트 : 8080)
 # GCP 설정 시 필요한 설정 외 다른 포트 Close)
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "${PORT:-8080}"]
+# CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8080"]
+CMD ["sh", "-c", "uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8080}"]
