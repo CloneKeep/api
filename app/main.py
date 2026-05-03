@@ -3,8 +3,19 @@ from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 from database import get_db
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
+
+# CORS 설정
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["https://integrationschedulerproject.github.io/"], # GitHub Pages 주소
+    allow_credentials=True,
+    allow_methods=["*"], # GET, POST 등 모두 허용
+    allow_headers=["*"],
+)
+
 
 @app.get('/')
 def root():
