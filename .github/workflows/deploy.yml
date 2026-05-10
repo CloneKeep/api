@@ -26,65 +26,102 @@
 #                 # 3. 빌드된 이미지 GHCR 푸쉬
 #                 docker push ghcr.io/$REPO_NAME:latest         
 
-name: Deploy with GHCR
+# name: Deploy with GHCR
+# on:
+#   push:
+#     branches: [ main ]
+# 
+# env:
+#   REGISTRY: ghcr.io
+#   # IMAGE_NAME: ${{ github.repository }}
+#   IMAGE_NAME: integrationschedulerproject/api
+# 
+# jobs:
+#   build-and-push:
+#     runs-on: ubuntu-latest
+#     permissions: # 내장 토큰 권한 설정
+#       contents: read
+#       packages: write
+#     steps:
+#       - name: Checkout
+#         uses: actions/checkout@v4
+# 
+#       - name: Log in to GHCR
+#         uses: docker/login-action@v3
+#         with:
+#           registry: ${{ env.REGISTRY }}
+#           username: ${{ github.actor }}
+#           password: ${{ secrets.GITHUB_TOKEN }} # 내장 토큰 사용
+# 
+#       - name: Build and Push
+#         uses: docker/build-push-action@v5
+#         with:
+#           context: .
+#           push: true
+#           tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+#           # 빌드 시점에 환경변수를 넘기려면 아래 build-args가 필요
+#           build-args: |
+#             DATABASE_URL=${{ secrets.DATABASE_URL }}
+# 
+#   deploy:
+#     needs: build-and-push
+#     runs-on: ubuntu-latest
+#     steps:
+#       - name: SSH Deploy
+#         uses: appleboy/ssh-action@v1.0.3
+#         with:
+#           host: ${{ secrets.HOST }}
+#           username: ${{ secrets.USERNAME }}
+#           key: ${{ secrets.SSH_KEY }}
+#           script: |
+#             # GHCR 로그인 (서버에서 한 번 필요)
+#             echo ${{ secrets.GITHUB_TOKEN }} | sudo docker login ghcr.io -u ${{ github.actor }} --password-stdin
+# 
+#             # 새 이미지 pull 및 실행
+#             sudo docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+#             sudo docker stop scheduler-con || true
+#             sudo docker rm scheduler-con || true
+#             
+#             # 실행 시에도 환경 변수를 넣어주어야 앱이 DB 주소를 인식
+#             sudo docker run -d -p 8080:8080 \
+#               --name scheduler-con \
+#               -e DATABASE_URL='${{ secrets.DATABASE_URL }}' \
+#               ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+
+name: Build and Push to GCP
 on:
   push:
     branches: [ main ]
 
 env:
-  REGISTRY: ghcr.io
-  # IMAGE_NAME: ${{ github.repository }}
-  IMAGE_NAME: integrationschedulerproject/api
+  PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+  REGION: asia-northeast3
+  REPO_NAME: integrationschedulerproject # 1번 단계에서 만든 저장소 이름
+  IMAGE_NAME: api-service
 
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
-    permissions: # 내장 토큰 권한 설정
-      contents: read
-      packages: write
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Log in to GHCR
-        uses: docker/login-action@v3
+      # 1. GCP 인증 (아까 등록한 JSON 키 사용)
+      - name: Google Auth
+        uses: 'google-github-actions/auth@v2'
         with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }} # 내장 토큰 사용
+          credentials_json: '${{ secrets.GCP_SA_KEY }}'
 
+      # 2. Docker가 GCP 창고에 접근할 수 있도록 로그인
+      - name: Docker Auth
+        run: gcloud auth configure-docker asia-northeast3-docker.pkg.dev
+
+      # 3. 이미지 빌드 및 푸시
       - name: Build and Push
         uses: docker/build-push-action@v5
         with:
           context: .
           push: true
-          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
-          # 빌드 시점에 환경변수를 넘기려면 아래 build-args가 필요
-          build-args: |
-            DATABASE_URL=${{ secrets.DATABASE_URL }}
-
-  deploy:
-    needs: build-and-push
-    runs-on: ubuntu-latest
-    steps:
-      - name: SSH Deploy
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.HOST }}
-          username: ${{ secrets.USERNAME }}
-          key: ${{ secrets.SSH_KEY }}
-          script: |
-            # GHCR 로그인 (서버에서 한 번 필요)
-            echo ${{ secrets.GITHUB_TOKEN }} | sudo docker login ghcr.io -u ${{ github.actor }} --password-stdin
-
-            # 새 이미지 pull 및 실행
-            sudo docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
-            sudo docker stop scheduler-con || true
-            sudo docker rm scheduler-con || true
-            
-            # 실행 시에도 환경 변수를 넣어주어야 앱이 DB 주소를 인식
-            sudo docker run -d -p 8080:8080 \
-              --name scheduler-con \
-              -e DATABASE_URL='${{ secrets.DATABASE_URL }}' \
-              ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+          # 주소 형식: 리전-docker.pkg.dev/프로젝트ID/저장소명/이미지명
+          tags: asia-northeast3-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPO_NAME }}/${{ env.IMAGE_NAME }}:latest
 
