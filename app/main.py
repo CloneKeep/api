@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app import config
 from app.database import get_db
-from app.routers import test
+from app.routers import test, contents
 
 
 app = FastAPI()
@@ -19,4 +19,5 @@ app.add_middleware(
 
 # 라우터 등록
 app.include_router(test.router)
+app.include_router(contents.router)
 
