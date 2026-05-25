@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app import config
 from app.database import get_db
-from app.routers import test, contents, users
+from app.routers import test, contents, users, notes
 
 
 app = FastAPI()
@@ -21,4 +21,5 @@ app.add_middleware(
 app.include_router(test.router)
 app.include_router(contents.router)
 app.include_router(users.router)
+app.include_router(notes.router)
 
