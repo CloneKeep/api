@@ -11,76 +11,60 @@ router = APIRouter(
     tags=["contents"]
 )
 
-# CREATE
-@router.post("/", response_model=schemas.ContentResponse, status_code=status.HTTP_201_CREATED)
+@router.post("/", response_model=schemas.ContentResponse, status_code=status.HTTP_201_CREATED,
+             summary="새 메모 콘텐츠 생성", 
+             description="새로운 메모 본문(콘텐츠)을 생성합니다. 텍스트 내용과 초기 상태값을 데이터베이스에 기록합니다.")
 def create_content(payload: schemas.ContentCreate, db: Session = Depends(get_db)):
-    """
-    Content 생성  
-    ```
-    payload={  
-      "content": "string",  
-      "status": 0,  
-      "created_id": "string",  
-      "updated_id": "string"  
-    }
-    ```
-    """
     db_content = models.Content(**payload.model_dump())
     db.add(db_content)
     db.commit()
     db.refresh(db_content)
     return db_content
 
-# READ ALL
-@router.get("/", response_model=list[schemas.ContentResponse])
+
+@router.get("/", response_model=list[schemas.ContentResponse],
+            summary="메모 콘텐츠 목록 전체 조회", 
+            description="시스템에 등록된 모든 메모 콘텐츠 목록을 페이징 처리하여 한 번에 조회합니다.")
 def read_contents(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
-    """
-    Content 전체조회  
-    skip : 조회 시작 인덱스 설정, 기본값 skip=0  
-    limit: 마지막 조회 인덱스 설정, 기본값 limit=100
-    """
     contents = db.query(models.Content).offset(skip).limit(limit).all()
     return contents
 
-# READ ONE
-@router.get("/{cid}", response_model=schemas.ContentResponse)
+
+@router.get("/{cid}", response_model=schemas.ContentResponse,
+            summary="특정 메모 콘텐츠 상세 조회", 
+            description="콘텐츠 고유 ID(cid)를 기반으로 단일 메모 본문의 상세 정보를 정확하게 찾아 조회합니다.")
 def read_content(cid: UUID, db: Session = Depends(get_db)):
-    """
-    특정 Content 조회
-    """
+    db_content = models.Content
     db_content = db.query(models.Content).filter(models.Content.cid == cid).first()
     if not db_content:
-        raise HTTPException(status_code=404, detail="Content not found")
+        raise HTTPException(status_code=404, detail="요청하신 콘텐츠를 찾을 수 없습니다.")
     return db_content
 
-# UPDATE
-@router.put("/{cid}", response_model=schemas.ContentResponse)
+
+@router.put("/{cid}", response_model=schemas.ContentResponse,
+            summary="특정 메모 콘텐츠 수정", 
+            description="콘텐츠 고유 ID(cid)를 받아 본문 내용이나 상태 정보 등을 선택적으로 변경합니다.")
 def update_content(cid: UUID, payload: schemas.ContentUpdate, db: Session = Depends(get_db)):
-    """
-    특정 Content 수정
-    """
     query = db.query(models.Content).filter(models.Content.cid == cid)
     db_content = query.first()
     
     if not db_content:
-        raise HTTPException(status_code=404, detail="Content not found")
+        raise HTTPException(status_code=404, detail="수정하려는 콘텐츠가 존재하지 않습니다.")
         
     query.update(payload.model_dump(exclude_unset=True))
     db.commit()
     db.refresh(db_content)
     return db_content
 
-# DELETE
-@router.delete("/{cid}", status_code=status.HTTP_204_NO_CONTENT)
+
+@router.delete("/{cid}", status_code=status.HTTP_204_NO_CONTENT,
+               summary="특정 메모 콘텐츠 영구 삭제", 
+               description="콘텐츠 고유 ID(cid)에 해당하는 메모 본문 레코드를 데이터베이스에서 완전히 영구 삭제합니다.")
 def delete_content(cid: UUID, db: Session = Depends(get_db)):
-    """
-    특정 Content 삭제
-    """
     db_content = db.query(models.Content).filter(models.Content.cid == cid).first()
     if not db_content:
-        raise HTTPException(status_code=404, detail="Content not found")
+        raise HTTPException(status_code=404, detail="삭제하려는 콘텐츠를 찾을 수 없습니다.")
         
     db.delete(db_content)
     db.commit()
     return None
-
