@@ -8,7 +8,7 @@ from .. import models, schemas
 
 router = APIRouter(
     prefix="/contents",
-    tags=["contents"]
+    tags=["Contents"]
 )
 
 @router.post("/", response_model=schemas.ContentResponse, status_code=status.HTTP_201_CREATED,

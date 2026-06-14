@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 from app.database import get_db
 
 
-router = APIRouter(prefix="", tags=[""])
+router = APIRouter(prefix="", tags=["Test"])
 
 @router.get('/')
 async def root():
