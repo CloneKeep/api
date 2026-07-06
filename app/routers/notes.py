@@ -4,8 +4,8 @@ from uuid import UUID
 from typing import List
 
 from app.database import get_db
-from app.models import Note  # 또는 프로젝트 import 규칙에 맞게 경로 수정 가능 (from app import models)
-from app.schemas.notes import NoteCreate, NoteUpdate, NoteResponse
+from app.models import Note, User, Hierarchy, Content  # 또는 프로젝트 import 규칙에 맞게 경로 수정 가능 (from app import models)
+from app.schemas.notes import NoteCreate, NoteUpdate, NoteResponse, ComplexNoteResponse, UserNotesRequest
 
 router = APIRouter(
     prefix="/notes",
@@ -36,6 +36,64 @@ def read_note(nid: UUID, db: Session = Depends(get_db)):
     if not db_note:
         raise HTTPException(status_code=404, detail="요청하신 노트를 찾을 수 없습니다.")
     return db_note
+
+
+@router.post("/me", response_model=ComplexNoteResponse,
+            summary="유저별 노트 상세 요약 (리스트 형태)", 
+            description="유저 ID를 기반으로 각 노트별 메타데이터와 하위 콘텐츠들을 리스트 형태로 반환합니다.")
+def get_my_notes(request_data: UserNotesRequest, db: Session = Depends(get_db)):
+    # 1. DB에서 4개 테이블 조인 및 정렬하여 데이터 조회
+    query_results = (
+        db.query(User, Note, Hierarchy, Content)
+        .join(Note, User.uid == Note.uid)
+        .join(Hierarchy, Note.nid == Hierarchy.nid)
+        .join(Content, Hierarchy.cid == Content.cid)
+        .filter(User.uid == request_data.uid)
+        .order_by(Note.nid, Hierarchy.c_pos.asc(), Content.status.asc())
+        .all()
+    )
+
+    if not query_results:
+        raise HTTPException(status_code=404, detail="요청하신 유저의 노트 데이터를 찾을 수 없습니다.")
+
+    # 2. 중간 조립을 위한 임시 딕셔너리 구조 { nid: { 유저노트데이터 } }
+    note_group = {}
+
+    for user_obj, note_obj, hierarchy_obj, content_obj in query_results:
+        # 노트 ID(nid)별로 그룹을 묶어줍니다 (DB에서 2줄이 나오면 2개의 그룹이 생김)
+        if note_obj.nid not in note_group:
+            note_group[note_obj.nid] = {
+                "uid": user_obj.uid,
+                "email": [user_obj.email],
+                "title_name": note_obj.title,
+                "note_type": note_obj.type,
+                "note_position": note_obj.n_pos,
+                "contents": {}
+            }
+        
+        # 해당 노트 그룹의 contents 내부에 하위 콘텐츠를 하나씩 추가
+        note_group[note_obj.nid]["contents"][hierarchy_obj.cid] = {
+            "text": content_obj.content,
+            "status": content_obj.status,
+            "c_pos": hierarchy_obj.c_pos
+        }
+
+    # 3. 임시로 묶은 그룹들을 원하는 최종 JSON 리스트 형태로 변환
+    final_response = []
+    for nid, data in note_group.items():
+        # "유저ID": { 데이터 } 구조로 만들어서 리스트에 append
+        formatted_item = {
+            data["uid"]: {
+                "email": data["email"],
+                "title_name": data["title_name"],
+                "note_type": data["note_type"],
+                "note_position": data["note_position"],
+                "contents": data["contents"]
+            }
+        }
+        final_response.append(formatted_item)
+
+    return final_response
 
 
 @router.put("/{nid}", response_model=NoteResponse,

@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import Optional
+from typing import Optional, Dict, List
 from datetime import datetime
 from uuid import UUID
 
@@ -42,4 +42,25 @@ class NoteResponse(NoteBase):
     model_config = {
         "from_attributes": True
     }
+
+# 본문(Body)으로 숨겨서 받을 유저 ID 구조
+class UserNotesRequest(BaseModel):
+    uid: UUID
+
+# 최하단 콘텐츠 정보
+class ContentDetail(BaseModel):
+    text: str
+    status: int
+    c_pos: int
+
+# 유저 ID 내부 데이터 구조
+class UserNoteDetails(BaseModel):
+    email: List[str]
+    title_name: str
+    note_type: str
+    note_position: int
+    contents: Dict[UUID, ContentDetail]  # {cid: ContentDetail}
+
+# 최종 응답 형태: { "user_uuid": UserNoteData }
+ComplexNoteResponse = List[Dict[UUID, UserNoteDetails]]
 

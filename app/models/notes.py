@@ -33,3 +33,4 @@ class Note(Base):
 
     # ORM 관계 설정 (User 모델과의 연결)
     user = relationship("User", back_populates="notes")
+    hierarchies = relationship("Hierarchy", back_populates="notes")
