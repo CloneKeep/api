@@ -42,56 +42,34 @@ def read_note(nid: UUID, db: Session = Depends(get_db)):
             summary="유저별 노트 상세 요약 (리스트 형태)", 
             description="유저 ID를 기반으로 각 노트별 메타데이터와 하위 콘텐츠들을 리스트 형태로 반환합니다.")
 def get_my_notes(request_data: UserNotesRequest, db: Session = Depends(get_db)):
-    # 1. DB에서 4개 테이블 조인 및 정렬하여 데이터 조회
+    from sqlalchemy import func
     query_results = (
-        db.query(User, Note, Hierarchy, Content)
+        db.query(
+            func.json_build_object(
+                User.uid, func.json_build_object(
+                    'email', func.json_build_array(User.email),
+                    'title_name', Note.title,
+                    'note_type', Note.type,
+                    'note_position', Note.n_pos,
+                    'contents', func.json_object_agg(
+                        Hierarchy.cid,
+                        func.json_build_object(
+                            'text', Content.content,
+                            'status', Content.status,
+                            'c_pos', Hierarchy.c_pos
+                        )
+                    )
+                )
+            )
+        )
         .join(Note, User.uid == Note.uid)
         .join(Hierarchy, Note.nid == Hierarchy.nid)
         .join(Content, Hierarchy.cid == Content.cid)
-        .filter(User.uid == request_data.uid)
-        .order_by(Note.nid, Hierarchy.c_pos.asc(), Content.status.asc())
+        .filter(User.uid == 'd54fc604-c1e5-4f3f-a598-e154a5f20fc3')
+        .group_by(User.uid, User.email, Note.title, Note.type, Note.n_pos)
         .all()
     )
-
-    if not query_results:
-        raise HTTPException(status_code=404, detail="요청하신 유저의 노트 데이터를 찾을 수 없습니다.")
-
-    # 2. 중간 조립을 위한 임시 딕셔너리 구조 { nid: { 유저노트데이터 } }
-    note_group = {}
-
-    for user_obj, note_obj, hierarchy_obj, content_obj in query_results:
-        # 노트 ID(nid)별로 그룹을 묶어줍니다 (DB에서 2줄이 나오면 2개의 그룹이 생김)
-        if note_obj.nid not in note_group:
-            note_group[note_obj.nid] = {
-                "uid": user_obj.uid,
-                "email": [user_obj.email],
-                "title_name": note_obj.title,
-                "note_type": note_obj.type,
-                "note_position": note_obj.n_pos,
-                "contents": {}
-            }
-        
-        # 해당 노트 그룹의 contents 내부에 하위 콘텐츠를 하나씩 추가
-        note_group[note_obj.nid]["contents"][hierarchy_obj.cid] = {
-            "text": content_obj.content,
-            "status": content_obj.status,
-            "c_pos": hierarchy_obj.c_pos
-        }
-
-    # 3. 임시로 묶은 그룹들을 원하는 최종 JSON 리스트 형태로 변환
-    final_response = []
-    for nid, data in note_group.items():
-        # "유저ID": { 데이터 } 구조로 만들어서 리스트에 append
-        formatted_item = {
-            data["uid"]: {
-                "email": data["email"],
-                "title_name": data["title_name"],
-                "note_type": data["note_type"],
-                "note_position": data["note_position"],
-                "contents": data["contents"]
-            }
-        }
-        final_response.append(formatted_item)
+    final_response = [row[0] for row in query_results]
 
     return final_response
 
