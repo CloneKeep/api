@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
+from sqlalchemy import func
 from uuid import UUID
 from typing import List
 
@@ -42,7 +43,6 @@ def read_note(nid: UUID, db: Session = Depends(get_db)):
             summary="유저별 노트 상세 요약 (리스트 형태)", 
             description="유저 ID를 기반으로 각 노트별 메타데이터와 하위 콘텐츠들을 리스트 형태로 반환합니다.")
 def get_my_notes(request_data: UserNotesRequest, db: Session = Depends(get_db)):
-    from sqlalchemy import func
     query_results = (
         db.query(
             func.json_build_object(
