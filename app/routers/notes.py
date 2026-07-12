@@ -65,7 +65,7 @@ def get_my_notes(request_data: UserNotesRequest, db: Session = Depends(get_db)):
         .join(Note, User.uid == Note.uid)
         .join(Hierarchy, Note.nid == Hierarchy.nid)
         .join(Content, Hierarchy.cid == Content.cid)
-        .filter(User.uid == 'd54fc604-c1e5-4f3f-a598-e154a5f20fc3')
+        .filter(User.uid == request_data.uid)
         .group_by(User.uid, User.email, Note.title, Note.type, Note.n_pos)
         .all()
     )
