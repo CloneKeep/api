@@ -43,25 +43,27 @@ def read_note(nid: UUID, db: Session = Depends(get_db)):
             summary="유저별 노트 상세 요약 (리스트 형태)", 
             description="유저 ID를 기반으로 각 노트별 메타데이터와 하위 콘텐츠들을 리스트 형태로 반환합니다.")
 def get_my_notes(request_data: UserNotesRequest, db: Session = Depends(get_db)):
-    query_results = (
-        db.query(
-            func.json_build_object(
-                User.uid, func.json_build_object(
-                    'email', func.json_build_array(User.email),
-                    'title_name', Note.title,
-                    'note_type', Note.type,
-                    'note_position', Note.n_pos,
-                    'contents', func.json_object_agg(
-                        Hierarchy.cid,
-                        func.json_build_object(
-                            'text', Content.content,
-                            'status', Content.status,
-                            'c_pos', Hierarchy.c_pos
-                        )
-                    )
+    # DB 조회 응답결과를 JSON 형태로 정의
+    json_structure = func.json_build_object(
+        User.uid, func.json_build_object(
+            'email', func.json_build_array(User.email),
+            'title_name', Note.title,
+            'note_type', Note.type,
+            'note_position', Note.n_pos,
+            'contents', func.json_object_agg(
+                Hierarchy.cid,
+                func.json_build_object(
+                    'text', Content.content,
+                    'status', Content.status,
+                    'c_pos', Hierarchy.c_pos
                 )
             )
         )
+    )
+
+    # 정의한 JSON 형태를 기반으로 DB 조회 
+    query_results = (
+        db.query(json_structure)
         .join(Note, User.uid == Note.uid)
         .join(Hierarchy, Note.nid == Hierarchy.nid)
         .join(Content, Hierarchy.cid == Content.cid)
@@ -69,6 +71,8 @@ def get_my_notes(request_data: UserNotesRequest, db: Session = Depends(get_db)):
         .group_by(User.uid, User.email, Note.title, Note.type, Note.n_pos)
         .all()
     )
+
+    # 조회결과에서 튜플타입 제거하기 
     final_response = [row[0] for row in query_results]
 
     return final_response
