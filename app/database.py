@@ -10,7 +10,14 @@ from  dotenv import load_dotenv
 load_dotenv()
 
 # 환경 변수 'DATABASE_URL' 사용 (GCP/GitHub Actions에서 주입)
-SQLALCHEMY_DATABASE_URL = os.getenv("DATABASE_URL")
+user = os.getenv("DB_USER")
+match = os.getenv("DB_PASS")
+host = os.getenv("DB_HOST")
+port = os.getenv("DB_PORT")
+name = os.getenv("DB_NAME")
+
+SQLALCHEMY_DATABASE_URL = f"postgresql://{user}:{match}@{host}:{port}/{name}"
+
 
 # 
 if not SQLALCHEMY_DATABASE_URL:
