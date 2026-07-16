@@ -28,9 +28,18 @@ class Hierarchy(Base):
     updated_id = Column(String, nullable=True) # 스키마에 따라 NULL 허용
 
     # ORM 관계(relationship) 정의 (선택 사항이지만 데이터 조회 시 매우 유용합니다)
-    notes = relationship("Note", back_populates="hierarchies")
+    note = relationship("Note", back_populates="hierarchies")
     
-    # 같은 contents 테이블을 바라보는 두 외래키 구분을 위해 foreign_keys 명시
-    content = relationship("Content", foreign_keys=[cid])
-    parent_content = relationship("Content", foreign_keys=[cnt_pid])
+    # Content 모델과의 관계 (★외래키가 2개이므로 foreign_keys 필수 지정★)
+    content = relationship(
+        "Content", 
+        foreign_keys=[cid], # cid 컬럼을 기준으로 Content와 연결됨을 명시
+        back_populates="hierarchies_as_cid"
+    )
+    
+    parent_content = relationship(
+        "Content", 
+        foreign_keys=[cnt_pid], # cnt_pid 컬럼을 기준으로 Content와 연결됨을 명시
+        back_populates="hierarchies_as_pid"
+    )
 

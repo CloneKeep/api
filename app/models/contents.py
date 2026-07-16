@@ -21,12 +21,13 @@ class Content(Base):
     hierarchies_as_cid = relationship(
         "Hierarchy", 
         foreign_keys="[Hierarchy.cid]", # 문자열로 명시할 때 테이블명.컬럼명 형태로 작성
-        # back_populates="content"
+        back_populates="content"
     )
     
     # Hierarchy의 'cnt_pid' 외래키를 타고 들어오는 관계들
     hierarchies_as_pid = relationship(
         "Hierarchy", 
         foreign_keys="[Hierarchy.cnt_pid]", 
-        # back_populates="parent_content"
+        back_populates="parent_content"
     )
+
