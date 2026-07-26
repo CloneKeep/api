@@ -23,8 +23,8 @@ def get_note_detail(db: Session, nid: UUID):
     return db_note
 
 # 유저별 복합 노트 요약 데이터 조회 로직 위임
-def get_my_notes_summary(db: Session, request_data: UserNotesRequest):
-    return note_repo.get_user_notes_summary_json(db, request_data.uid)
+def get_my_notes_summary(db: Session, user_id: UUID):
+    return note_repo.get_user_notes_summary_json(db, user_id)
 
 # 노트 수정 및 존재 여부 검증
 def modify_note(db: Session, nid: UUID, payload: NoteUpdate):
