@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from uuid import UUID
 
 from app.database import get_db
-from app.schemas.users import UserCreate, UserResponse
+from app.schemas.users import UserCreate, UserResponse, UserLogin, Token # , UserProfileResponse
 from app.services import users as user_service  # Service 호출
 
 router = APIRouter(
@@ -21,4 +21,10 @@ def create_user(payload: UserCreate, db: Session = Depends(get_db)):
             summary="유저 정보 단건 조회", description="유저 ID(UUID)를 기반으로 특정 사용자의 프로필 정보를 조회합니다.")
 def read_user(uid: UUID, db: Session = Depends(get_db)):
     return user_service.get_user_profile(db=db, uid=uid)
+
+
+@router.post("/login", response_model=Token,
+            summary="가입 유저 로그인", description="가입 회원의 아이디와 비밀번호를 확인하고 토큰을 발급합니다.")
+def user_login(login_data: UserLogin, db: Session = Depends(get_db)):
+    return user_service.user_login(db=db, login_data=login_data)
 

@@ -1,15 +1,35 @@
-import hashlib
+from datetime import datetime, timedelta, timezone
+from typing import Optional
+import jwt
+from passlib.context import CryptContext
 
-def hash_password(password: str) -> str:
-    """
-    날것의 문자열 비밀번호를 받아 SHA-256 해시값(텍스트)으로 변환합니다.
-    """
-    # hashlib은 바이트(bytes) 단위를 입력받으므로 string을 utf-8로 인코딩해야 합니다.
-    password_bytes = password.encode('utf-8')
-    
-    # SHA-256 해시 객체 생성 및 업데이트
-    sha256_hash = hashlib.sha256(password_bytes)
-    
-    # 최종적으로 16진수 문자열(Hex 정렬)로 반환합니다.
-    return sha256_hash.hexdigest()
+from app.auth_config import auth_settings # JWT 보안 세팅값
+
+# 비밀번호 암호화 컨텍스트 설정 (bcrypt 알고리즘 사용)
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+# 비밀번호 해싱 함수 (회원가입 시 사용)
+def password_hash(password: str) -> str:
+    return pwd_context.hash(password)
+
+# 비밀번호 검증 함수 (로그인 시 사용)
+def verify_password(plain_password: str, hashed_password: str) -> bool:
+    return pwd_context.verify(plain_password, hashed_password)
+
+# JWT 엑세스 토큰 발행 함수
+def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
+    to_encode = data.copy()
+
+    # 만료 시간(exp) 계산 (별도 설정이 없으면 auth_settings의 30분 적용)
+    if expires_delta:
+        expire = datetime.now(timezone.utc) + expires_delta
+    else:
+        expire = datetime.now(timezone.utc) + timedelta(minutes=auth_settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+
+    # 만료 시간을 토큰 데이터(Payload)에 주입
+    to_encode.update({"exp": expire})
+
+    # auth_config에 설정된 비밀키와 알고리즘으로 서명하여 외계어 문자열(JWT) 완성
+    encoded_jwt = jwt.encode(to_encode, auth_settings.JWT_SECRET_KEY, algorithm=auth_settings.ALGORITHM)
+    return encoded_jwt
 

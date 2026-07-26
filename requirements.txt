@@ -3,3 +3,8 @@ uvicorn
 sqlalchemy # ORM 라이브러리
 psycopg2-binary # PostgreSQL 연결 드라이버
 python-dotenv # .env 환경변수로드 libs
+pyjwt[crypto] # JWT 토큰 생성 및 검증
+passlib # 비밀번호 암호화 및 해싱
+bcrypt<=4.0.1
+pydantic[email] # EmailStr 형식 검증용 라이브러리
+
