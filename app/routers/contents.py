@@ -2,9 +2,9 @@ from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
 from uuid import UUID
 
-from ..database import get_db
-from .. import schemas
-from ..services import contents as content_service
+from app.core.database import get_db
+from app import schemas
+from app.services import contents as content_service
 
 router = APIRouter(
     prefix="/contents",

@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from uuid import UUID
 
 from app.schemas.users import UserCreate, UserLogin
-from app.utils import password_hash, verify_password, create_access_token
+from app.core.security import password_hash, verify_password, create_access_token
 from app.repositories import users as user_repo  # Repository 호출
 
 # 신규 회원가입 비즈니스 로직

@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
 from uuid import UUID
 
-from app.database import get_db
+from app.core.database import get_db
 from app.schemas.users import UserCreate, UserResponse, UserLogin, Token # , UserProfileResponse
 from app.services import users as user_service  # Service 호출
 

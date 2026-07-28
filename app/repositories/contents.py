@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
 from uuid import UUID
-from .. import models, schemas
+from app import models, schemas
 
 # 새로운 콘텐츠 생성 후 DB 저장
 def create_content(db: Session, payload: schemas.ContentCreate) -> models.Content:

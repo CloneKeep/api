@@ -5,7 +5,7 @@ from sqlalchemy.sql import func
 import uuid
 
 # 상대 경로 대신 안전한 절대 경로 사용
-from app.database import Base
+from app.core.database import Base
 
 class Note(Base):
     __tablename__ = "notes"

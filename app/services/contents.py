@@ -1,8 +1,8 @@
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 from uuid import UUID
-from .. import schemas
-from ..repositories import contents as content_repo
+from app import schemas
+from app.repositories import contents as content_repo
 
 # 콘텐츠 생성 로직 위임
 def create_new_content(db: Session, payload: schemas.ContentCreate):

@@ -4,7 +4,7 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 import uuid
 
-from app.database import Base
+from app.core.database import Base
 
 class Hierarchy(Base):
     __tablename__ = "hierarchy"
