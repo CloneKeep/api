@@ -5,6 +5,7 @@ from uuid import UUID
 from app.core.database import get_db
 from app.schemas.users import UserCreate, UserResponse, UserLogin, Token # , UserProfileResponse
 from app.services import users as user_service  # Service 호출
+from app.core.security import validate_access_token, validate_refresh_token
 
 router = APIRouter(
     prefix="/users",
@@ -27,4 +28,10 @@ def read_user(uid: UUID, db: Session = Depends(get_db)):
             summary="가입 유저 로그인", description="가입 회원의 아이디와 비밀번호를 확인하고 토큰을 발급합니다.")
 def user_login(login_data: UserLogin, db: Session = Depends(get_db)):
     return user_service.user_login(db=db, login_data=login_data)
+
+
+@router.post("/refresh", response_model=Token,
+            summary="Access Token 재발급", description="유효한 Refresh Token을 전달하면 새로운 Access Token 발급")
+def refresh_access_token(current_uid: str = Depends(validate_refresh_token), db: Session = Depends(get_db)):
+    return user_service.refresh_access_token(db=db, user_id=current_uid)
 

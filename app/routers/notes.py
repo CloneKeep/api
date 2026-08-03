@@ -5,12 +5,12 @@ from uuid import UUID
 from app.core.database import get_db
 from app.schemas.notes import NoteCreate, NoteUpdate, NoteResponse, ComplexNoteResponse, UserNotesRequest
 from app.services import notes as note_service
-from app.core.security import get_current_user_id
+from app.core.security import validate_access_token
 
 router = APIRouter(
     prefix="/notes",
     tags=["Notes"],
-    dependencies=[Depends(get_current_user_id)] # JWT 인증 의존성 주입
+    dependencies=[Depends(validate_access_token)] # JWT 인증 의존성 주입
 )
 
 @router.post("/", response_model=NoteResponse, status_code=status.HTTP_201_CREATED,
@@ -28,7 +28,7 @@ def read_notes(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
 @router.get("/me", response_model=ComplexNoteResponse,
             summary="유저별 노트 상세 요약 (리스트 형태)", 
             description="유저 ID를 기반으로 각 노트별 메타데이터와 하위 콘텐츠들을 리스트 형태로 반환합니다.")
-def get_my_notes(current_uid: str = Depends(get_current_user_id), db: Session = Depends(get_db)):
+def get_my_notes(current_uid: str = Depends(validate_access_token), db: Session = Depends(get_db)):
     return note_service.get_my_notes_summary(db=db, user_id=current_uid)
 
 

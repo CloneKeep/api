@@ -50,20 +50,29 @@ def user_login(db: Session, login_data: UserLogin):
     if not verify_password(login_data.password, user.pw_hash):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="아이디 또는 비밀번호가 올바르지 않습니다.")
 
-    # 3. [보안 핵심] DB에서 꺼낸 유저의 고유 uid를 토큰의 'sub' 키에 바인딩하여 생성
+    return generate_token_pair(user.uid)
+
+
+# 유효한 Refresh Token으로 Access Token 재발급
+def refresh_access_token(db: Session, user_id: UUID):
+    return generate_token_pair(user_id)
+
+
+# 유저 ID/PW를 확인하고 JWT 토큰 발급
+def generate_token_pair(user_id: UUID):
+    # [보안 핵심] 유저의 고유 uid를 토큰의 'sub' 키에 바인딩하여 생성
     access_token = create_token(
-        data={"sub": str(user.uid), "type": "access"}, 
+        data={"sub": str(user_id), "type": "access"}, 
         expires_delta=timedelta(minutes=jwt_settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     )
     refresh_token = create_token(
-        data={"sub": str(user.uid), "type": "refresh"}, 
+        data={"sub": str(user_id), "type": "refresh"}, 
         expires_delta=timedelta(days=jwt_settings.REFRESH_TOKEN_EXPIRE_DAYS)
     )
 
-    # 4. 규격에 맞게 토큰 반환
+    # 규격에 맞게 토큰 반환
     return {
         "access_token": access_token,
         "refresh_token": refresh_token,
         "token_type": "bearer"
     }
-
