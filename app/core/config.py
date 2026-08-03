@@ -14,6 +14,7 @@ class JwtSettings:
     JWT_SECRET_KEY: str = os.getenv("JWT_SECRET_KEY") # JWT 비밀키
     ALGORITHM: str = "HS256"                          # JWT 암호화 알고리즘
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30             # 토큰 만료시간, 30분 설정
+    REFRESH_TOKEN_EXPIRE_DAYS: int = 7                # 토큰 만료시간, 7일 설정
 
     # .env에 키가 누락되었을 경우 서버 실행 차단
     def __init__(self):

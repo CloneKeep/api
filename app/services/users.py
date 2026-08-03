@@ -1,9 +1,11 @@
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
+from datetime import timedelta
 from uuid import UUID
 
 from app.schemas.users import UserCreate, UserLogin
-from app.core.security import password_hash, verify_password, create_access_token
+from app.core.security import password_hash, verify_password, create_token
+from app.core.config import jwt_settings # JWT 보안 세팅값
 from app.repositories import users as user_repo  # Repository 호출
 
 # 신규 회원가입 비즈니스 로직
@@ -49,7 +51,19 @@ def user_login(db: Session, login_data: UserLogin):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="아이디 또는 비밀번호가 올바르지 않습니다.")
 
     # 3. [보안 핵심] DB에서 꺼낸 유저의 고유 uid를 토큰의 'sub' 키에 바인딩하여 생성
-    access_token = create_access_token(data={"sub": str(user.uid)})
+    access_token = create_token(
+        data={"sub": str(user.uid), "type": "access"}, 
+        expires_delta=timedelta(minutes=jwt_settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+    )
+    refresh_token = create_token(
+        data={"sub": str(user.uid), "type": "refresh"}, 
+        expires_delta=timedelta(days=jwt_settings.REFRESH_TOKEN_EXPIRE_DAYS)
+    )
 
     # 4. 규격에 맞게 토큰 반환
-    return {"access_token": access_token, "token_type": "bearer"}
+    return {
+        "access_token": access_token,
+        "refresh_token": refresh_token,
+        "token_type": "bearer"
+    }
+

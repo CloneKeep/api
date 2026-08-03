@@ -31,5 +31,6 @@ class UserLogin(UserBase):
 # 토큰 응답 스키마
 class Token(BaseModel):
     access_token: str
+    refresh_token: str
     token_type: str
 

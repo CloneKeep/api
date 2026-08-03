@@ -24,10 +24,10 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
     return pwd_context.verify(plain_password, hashed_password)
 
 # JWT 엑세스 토큰 발행 함수
-def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
+def create_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
     to_encode = data.copy()
 
-    # 만료 시간(exp) 계산 (별도 설정이 없으면 jwt_settings의 30분 적용)
+    # 만료 시간(exp) 계산 (별도 설정이 없으면 ACCESS_TOKEN_EXPIRE_MINUTES의 30분 적용)
     if expires_delta:
         expire = datetime.now(timezone.utc) + expires_delta
     else:
