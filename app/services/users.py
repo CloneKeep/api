@@ -76,3 +76,4 @@ def generate_token_pair(user_id: UUID):
         "refresh_token": refresh_token,
         "token_type": "bearer"
     }
+
