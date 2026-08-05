@@ -85,3 +85,4 @@ class TokenValidator:
 # 라우터에서 간결하게 사용할 수 있도록 인스턴스 미리 생성
 validate_access_token = TokenValidator(required_type="access")
 validate_refresh_token = TokenValidator(required_type="refresh")
+
