@@ -8,30 +8,30 @@ import uuid
 from app.core.database import Base
 
 class Note(Base):
-    __tablename__ = "notes"
+    __tablename__ = "notes_dup"
 
     # 기본키 및 외래키 설정
-    nid = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    uid = Column(UUID(as_uuid=True), ForeignKey("users.uid"), nullable=False)
+    id      = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    user_id = Column(UUID(as_uuid=True), ForeignKey("users_dup.id"), nullable=False)
     
-    # 기본 노트 정보 컬럼
-    title = Column(String, nullable=True)
-    type = Column(String, nullable=False, default="general")
-    n_pos = Column(Integer, default=0)
+    # 기본 note 정보 컬럼
+    title    = Column(String, nullable=False)
+    type     = Column(String, nullable=False, default="general")
+    position = Column(Integer, nullable=False, default=0)
+    color    = Column(String, nullable=True)
     
-    # 상태 및 커스텀 기능 컬럼 (SQL 스키마 확장 반영)
-    is_color = Column(String, nullable=True)       # TEXT 타입 매핑
-    is_pinned = Column(Boolean, nullable=True, default=False)    # BOOLEAN 타입 매핑
-    is_archived = Column(Boolean, nullable=True, default=False)  # BOOLEAN 타입 매핑
-    is_trashed = Column(Boolean, nullable=True, default=False)   # BOOLEAN 타입 매핑
+    # 상태 및 커스텀 기능 컬럼
+    is_pinned   = Column(Boolean, nullable=True, default=False)
+    is_archived = Column(Boolean, nullable=True, default=False)
+    is_trashed  = Column(Boolean, nullable=True, default=False)
     
     # 생성 및 수정 메타데이터 정보
     created_at = Column(DateTime(timezone=True), default=func.now())
-    created_id = Column(String, nullable=False)
     updated_at = Column(DateTime(timezone=True), default=func.now(), onupdate=func.now())
-    updated_id = Column(String, nullable=False)
+
+    # Content 모델과의 1:N 관계 정의
+    contents = relationship("Content", back_populates="note")
 
     # ORM 관계 설정 (User 모델과의 연결)
     user = relationship("User", back_populates="notes")
-    hierarchies = relationship("Hierarchy", back_populates="note")
 

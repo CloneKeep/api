@@ -7,16 +7,14 @@ import uuid
 from app.core.database import Base
 
 class User(Base):
-    __tablename__ = "users"
+    __tablename__ = "users_dup"
 
-    uid = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    email = Column(String, unique=True, nullable=False)
-    pw_hash = Column(String, nullable=False)
-    
+    id         = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    email      = Column(String, unique=True, nullable=False)
+    password   = Column(String, nullable=False)
+    nickname   = Column(String, nullable=False)
     created_at = Column(DateTime(timezone=True), default=func.now())
-    created_id = Column(String, nullable=False)
     updated_at = Column(DateTime(timezone=True), default=func.now(), onupdate=func.now())
-    updated_id = Column(String, nullable=False)
 
     # Note 모델과의 1:N 관계 정의
     notes = relationship("Note", back_populates="user")
