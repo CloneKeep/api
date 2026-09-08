@@ -8,11 +8,11 @@ import uuid
 from app.core.database import Base
 
 class Note(Base):
-    __tablename__ = "notes"
+    __tablename__ = "notes_dup"
 
     # 기본키 및 외래키 설정
     id      = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
+    user_id = Column(UUID(as_uuid=True), ForeignKey("users_dup.id"), nullable=False)
     
     # 기본 note 정보 컬럼
     title    = Column(String, nullable=False)

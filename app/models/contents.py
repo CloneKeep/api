@@ -7,11 +7,11 @@ import uuid
 from app.core.database import Base
 
 class Content(Base):
-    __tablename__ = "contents"
+    __tablename__ = "contents_dup"
 
     # 기본키 및 외래키 설정
     id      = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    note_id = Column(UUID(as_uuid=True), ForeignKey("notes.id"), nullable=False)
+    note_id = Column(UUID(as_uuid=True), ForeignKey("notes_dup.id"), nullable=False)
 
     # 기본 content 정보 컬럼
     content     = Column(Text)
