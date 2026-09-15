@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 from uuid import UUID
-from app.models import Note, User, Hierarchy, Content
+from app.models import Note, User, Content
 from app.schemas.notes import NoteCreate, NoteUpdate
 
 # 새로운 노트 생성 후 DB 저장
@@ -23,17 +23,17 @@ def get_note_by_nid(db: Session, nid: UUID) -> Note | None:
 # 유저 ID를 기반으로 노트 메타데이터와 하위 콘텐츠들을 구조화된 JSON 데이터로 복합 조회
 def get_user_notes_summary_json(db: Session, uid: UUID) -> list:
     json_structure = func.json_build_object(
-        User.uid, func.json_build_object(
+        User.id, func.json_build_object(
             'email', func.json_build_array(User.email),
             'title_name', Note.title,
             'note_type', Note.type,
-            'note_position', Note.n_pos,
+            'note_position', Note.position,
             'contents', func.json_object_agg(
-                Hierarchy.cid,
+                Content.id,
                 func.json_build_object(
                     'text', Content.content,
-                    'status', Content.status,
-                    'c_pos', Hierarchy.c_pos
+                    'status', Content.is_checked,
+                    'c_pos', Content.position
                 )
             )
         )
@@ -41,11 +41,10 @@ def get_user_notes_summary_json(db: Session, uid: UUID) -> list:
 
     query_results = (
         db.query(json_structure)
-        .join(Note, User.uid == Note.uid)
-        .join(Hierarchy, Note.nid == Hierarchy.nid)
-        .join(Content, Hierarchy.cid == Content.cid)
-        .filter(User.uid == uid)
-        .group_by(User.uid, User.email, Note.title, Note.type, Note.n_pos)
+        .join(Note, User.id == Note.user_id)
+        .join(Content, Note.id == Content.note_id)
+        .filter(User.id == uid)
+        .group_by(User.id, User.email, Note.title, Note.type, Note.position)
         .all()
     )
 
