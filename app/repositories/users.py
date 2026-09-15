@@ -12,7 +12,7 @@ def get_user_by_uid(db: Session, uid: UUID) -> User | None:
 
 # 새로운 사용자 레코드 생성
 def create_user(db: Session, user_data: dict, hashed_password: str) -> User:
-    db_user = User(**user_data, pw_hash=hashed_password)
+    db_user = User(**user_data, password=hashed_password)
     db.add(db_user)
     db.commit()
     db.refresh(db_user)
