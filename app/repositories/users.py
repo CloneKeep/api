@@ -8,7 +8,7 @@ def get_user_by_email(db: Session, email: str) -> User | None:
 
 # UUID로 사용자 조회
 def get_user_by_uid(db: Session, uid: UUID) -> User | None:
-    return db.query(User).filter(User.uid == uid).first()
+    return db.query(User).filter(User.id == uid).first()
 
 # 새로운 사용자 레코드 생성
 def create_user(db: Session, user_data: dict, hashed_password: str) -> User:
