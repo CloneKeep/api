@@ -7,8 +7,8 @@ from uuid import UUID
 class NoteBase(BaseModel):
     title: Optional[str] = None
     type: str = "general"  # DB 모델에서 nullable=False이므로 기본값 지정 혹은 필수값 처리
-    n_pos: int = 0
-    is_color: Optional[str] = None
+    positioin: int = 0
+    color: Optional[str] = None
     is_pinned: Optional[bool] = False
     is_archived: Optional[bool] = False
     is_trashed: Optional[bool] = False
@@ -32,16 +32,10 @@ class NoteUpdate(BaseModel):  # 모든 필드를 선택적으로 수정 가능�
 
 # 4. DB 응답 스키마
 class NoteResponse(NoteBase):
-    nid: UUID              # id: int 에서 nid: UUID로 수정
-    uid: UUID
+    id: UUID              # id: int 에서 nid: UUID로 수정
+    user_id: UUID
     created_at: datetime
-    created_id: str
     updated_at: datetime
-    updated_id: str
-
-    model_config = {
-        "from_attributes": True
-    }
 
 # 본문(Body)으로 숨겨서 받을 유저 ID 구조
 class UserNotesRequest(BaseModel):
