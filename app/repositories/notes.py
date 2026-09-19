@@ -18,7 +18,7 @@ def get_notes(db: Session, skip: int, limit: int) -> list[Note]:
 
 # 고유 ID 기반 노트 단건 조회
 def get_note_by_nid(db: Session, nid: UUID) -> Note | None:
-    return db.query(Note).filter(Note.nid == nid).first()
+    return db.query(Note).filter(Note.id == nid).first()
 
 # 유저 ID를 기반으로 노트 메타데이터와 하위 콘텐츠들을 구조화된 JSON 데이터로 복합 조회
 def get_user_notes_summary_json(db: Session, uid: UUID) -> list:
