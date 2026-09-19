@@ -53,7 +53,7 @@ def get_user_notes_summary_json(db: Session, uid: UUID) -> list:
 
 # 노트의 선택적 필드 수정 및 반영
 def update_note(db: Session, nid: UUID, payload: NoteUpdate) -> Note | None:
-    query = db.query(Note).filter(Note.nid == nid)
+    query = db.query(Note).filter(Note.id == nid)
     db_note = query.first()
     
     if not db_note:

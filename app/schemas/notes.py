@@ -22,12 +22,11 @@ class NoteCreate(NoteBase):
 class NoteUpdate(BaseModel):  # 모든 필드를 선택적으로 수정 가능하도록 분리
     title: Optional[str] = None
     type: Optional[str] = None
-    n_pos: Optional[int] = None
-    is_color: Optional[str] = None
+    position: Optional[int] = None
+    color: Optional[str] = None
     is_pinned: Optional[bool] = None
     is_archived: Optional[bool] = None
     is_trashed: Optional[bool] = None
-    updated_id: str        # 수정자 식별자는 필수
 
 # 4. DB 응답 스키마
 class NoteResponse(NoteBase):
