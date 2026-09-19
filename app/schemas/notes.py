@@ -7,7 +7,7 @@ from uuid import UUID
 class NoteBase(BaseModel):
     title: Optional[str] = None
     type: str = "general"  # DB 모델에서 nullable=False이므로 기본값 지정 혹은 필수값 처리
-    positioin: int = 0
+    position: int = 0
     color: Optional[str] = None
     is_pinned: Optional[bool] = False
     is_archived: Optional[bool] = False
@@ -15,9 +15,8 @@ class NoteBase(BaseModel):
 
 # 2. 노트 생성 시 요청받는 스키마
 class NoteCreate(NoteBase):
-    uid: UUID              # 작성자 ID (외래키 필수값)
-    created_id: str        # 생성자 식별자
-    updated_id: str        # 수정자 식별자
+    id: UUID              # id: int 에서 nid: UUID로 수정
+    user_id: UUID              # 작성자 ID (외래키 필수값)
 
 # 3. 노트 수정 시 요청받는 스키마
 class NoteUpdate(BaseModel):  # 모든 필드를 선택적으로 수정 가능하도록 분리
