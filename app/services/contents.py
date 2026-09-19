@@ -5,7 +5,7 @@ from app import schemas
 from app.repositories import contents as content_repo
 
 # 콘텐츠 생성 로직 위임
-def create_new_content(db: Session, payload: schemas.ContentCreate):
+def create_new_content(db: Session, payload: schemas.ContentBase):
     return content_repo.create_content(db, payload)
 
 # 콘텐츠 목록 전체 조회 로직 위임

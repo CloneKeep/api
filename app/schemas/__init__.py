@@ -1,10 +1,10 @@
 # from .users import UserCreate, UserResponse
 # from .notes import NoteCreate, NoteResponse
-from .contents import ContentCreate, ContentResponse, ContentUpdate
+from .contents import ContentBase, ContentResponse, ContentUpdate
 
 __all__ = [
     "UserCreate", "UserResponse",
     "NoteCreate", "NoteResponse",
-    "ContentCreate", "ContentResponse", "ContentUpdate"
+    "ContentBase", "ContentResponse", "ContentUpdate"
 ]
 

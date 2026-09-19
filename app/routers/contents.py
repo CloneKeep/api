@@ -14,7 +14,7 @@ router = APIRouter(
 @router.post("/", response_model=schemas.ContentResponse, status_code=status.HTTP_201_CREATED,
              summary="새 메모 콘텐츠 생성", 
              description="새로운 메모 본문(콘텐츠)을 생성합니다. 텍스트 내용과 초기 상태값을 데이터베이스에 기록합니다.")
-def create_content(payload: schemas.ContentCreate, db: Session = Depends(get_db)):
+def create_content(payload: schemas.ContentBase, db: Session = Depends(get_db)):
     return content_service.create_new_content(db=db, payload=payload)
 
 

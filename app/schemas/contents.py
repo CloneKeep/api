@@ -5,24 +5,24 @@ from typing import Optional
 
 # --- Content Schemas ---
 class ContentBase(BaseModel):
+    note_id: UUID
     content: Optional[str] = None
-    status: int = 0
+    position: Optional[int] = 0
+    is_checked: Optional[bool] = False
 
-class ContentCreate(ContentBase):
-    created_id: str
-    updated_id: str
+# class ContentCreate(ContentBase):
+#     created_id: str
+#     updated_id: str
 
 class ContentUpdate(BaseModel):
     content: Optional[str] = None
-    status: Optional[int] = None
-    updated_id: str
+    position: Optional[int] = 0
+    is_checked: Optional[bool] = False
 
 class ContentResponse(ContentBase):
-    cid: UUID
+    id: UUID
     created_at: datetime
-    created_id: str
     updated_at: datetime
-    updated_id: str
 
     class Config:
         from_attributes = True
